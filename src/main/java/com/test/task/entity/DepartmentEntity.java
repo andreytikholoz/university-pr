@@ -1,6 +1,5 @@
 package com.test.task.entity;
 
-import com.test.task.enums.Departments;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
