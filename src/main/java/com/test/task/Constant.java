@@ -12,6 +12,7 @@ public class Constant {
 
     public static final String ENTER_DEPARTMENT_NAME = "Enter name of department:";
     public static final String ENTER_TEMPLATE = "Enter template:";
+    public static final String NO_MATCHES = "No one was found matching the specified template";
     public static final String WRONG_DATA = "You entered incorrect data, please try again";
     public static final String ONE = "1";
     public static final String TWO = "2";

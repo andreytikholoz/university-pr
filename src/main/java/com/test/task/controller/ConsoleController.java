@@ -6,10 +6,8 @@ import com.test.task.service.UniversityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.test.task.Constant.*;
 
@@ -25,43 +23,60 @@ public class ConsoleController {
         while (true) {
             System.out.println(CHOOSE_COMMAND);
             String input = scanner.nextLine();
+            List<String> departmentsList = Arrays
+                    .stream(Departments.values())
+                    .map(Departments::getDegreeName)
+                    .collect(Collectors.toList());
 
             switch (input) {
                 case ONE:
                     System.out.println(ENTER_DEPARTMENT_NAME);
                     input = scanner.nextLine();
-                    LectorEntity lectorEntity = universityService.findHeadOfDepartment(input);
-                    System.out.println("Head of " + input + " department is " + lectorEntity.getFirstName() + " "
-                            + lectorEntity.getLastName());
+                    if (departmentsList.contains(input)) {
+                        LectorEntity lectorEntity = universityService.findHeadOfDepartment(input);
+                        System.out.println("Head of " + input + " department is " + lectorEntity.getFirstName() + " "
+                                + lectorEntity.getLastName());
+                    } else System.out.println(WRONG_DATA);
                     break;
                 case TWO:
                     System.out.println(ENTER_DEPARTMENT_NAME);
                     input = scanner.nextLine();
-                    Map<String, Integer> statistics = universityService.departmentStatistics(input);
-                    System.out.println("assistants - " + statistics.get("assistants") +
-                            "\nassociate professors - " + statistics.get("associate professors") +
-                            "\nprofessors - " + statistics.get("professors"));
+                    if (departmentsList.contains(input)) {
+                        Map<String, Integer> statistics = universityService.departmentStatistics(input);
+                        System.out.println("assistants - " + statistics.get("assistants") +
+                                "\nassociate professors - " + statistics.get("associate professors") +
+                                "\nprofessors - " + statistics.get("professors"));
+                    } else System.out.println(WRONG_DATA);
                     break;
                 case THREE:
                     System.out.println(ENTER_DEPARTMENT_NAME);
                     input = scanner.nextLine();
-                    double averageSalary = universityService.averageSalary(input);
-                    System.out.println("The average salary of " + input + " is " + averageSalary);
+                    if (departmentsList.contains(input)) {
+                        double averageSalary = universityService.averageSalary(input);
+                        System.out.println("The average salary of " + input + " is " + averageSalary);
+                    } else System.out.println(WRONG_DATA);
                     break;
                 case FOUR:
                     System.out.println(ENTER_DEPARTMENT_NAME);
                     input = scanner.nextLine();
-                    int countEmployee = universityService.countEmployee(input);
-                    System.out.println(countEmployee);
+                    if (departmentsList.contains(input)) {
+                        int countEmployee = universityService.countEmployee(input);
+                        System.out.println(countEmployee);
+                    } else System.out.println(WRONG_DATA);
                     break;
                 case FIVE:
                     System.out.println(ENTER_TEMPLATE);
                     input = scanner.nextLine();
                     Set<LectorEntity> lectors = universityService.globalSearch(input);
-                    lectors.forEach(lector -> System.out.println(lector.getFirstName() + " " + lector.getLastName()));
+                    if (lectors.isEmpty()) {
+                        System.out.println(NO_MATCHES);
+                    } else
+                        lectors.forEach(lector -> System.out.println(lector.getFirstName() + " " + lector.getLastName()));
                     break;
                 case SIX:
-                    Arrays.stream(Departments.values()).map(Departments::getDegreeName).forEach(System.out::println);
+                    Arrays.stream(Departments.values())
+                            .map(Departments::getDegreeName)
+                            .forEach(System.out::println);
                     break;
                 default:
                     System.out.println(WRONG_DATA);
