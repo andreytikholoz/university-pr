@@ -1,17 +1,22 @@
 package com.test.task.entity;
 
-import com.test.task.enums.AcademicDegree;
-import lombok.Data;
+import com.test.task.enums.Degree;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = "departments")
 @Table(name = "LECTOR_ENTITY_T01")
 public class LectorEntity {
     @Id
@@ -31,17 +36,12 @@ public class LectorEntity {
 
     @Column(name = "ACADEMIC_DEGREE")
     @Enumerated(EnumType.STRING)
-    private AcademicDegree academicDegree;
+    private Degree academicDegree;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "LECTOR_DEPARTMENT_T01",
-            joinColumns = {@JoinColumn(name = "DEPARTMENT_ID")},
-            inverseJoinColumns = {@JoinColumn(name = "LECTOR_ID")}
-    )
-    private Set<DepartmentEntity> departments;
+    @ManyToMany(mappedBy = "lectors")
+    private Set<DepartmentEntity> departments = new HashSet<>();
 
-    public LectorEntity(String firstName, String lastName, int salary, AcademicDegree academicDegree) {
+    public LectorEntity(String firstName, String lastName, int salary, Degree academicDegree) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = salary;

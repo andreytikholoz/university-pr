@@ -2,15 +2,20 @@ package com.test.task.service;
 
 import com.test.task.entity.DepartmentEntity;
 import com.test.task.entity.LectorEntity;
-import com.test.task.enums.AcademicDegree;
 import com.test.task.repository.DepartmentRepository;
 import com.test.task.repository.LectorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class UniversityService {
     @Autowired
     private DepartmentRepository departmentRepository;
@@ -18,58 +23,65 @@ public class UniversityService {
     @Autowired
     private LectorRepository lectorRepository;
 
-    public void findHeadOfDepartment(String departmentName) {
-        DepartmentEntity department = departmentRepository.findByName(departmentName);
-        LectorEntity lectorEntity = department.getHead();
-        System.out.println("Head of " + departmentName + " department is " + lectorEntity.getFirstName() + " "
-                + lectorEntity.getLastName());
+    public LectorEntity findHeadOfDepartment(String departmentName) {
+        DepartmentEntity department = departmentRepository.findByName(departmentName)
+                .orElseThrow(() -> new NoSuchElementException("Department with id = [" + departmentName + "] not exist"));
+        return department.getHead();
     }
 
-    public void departmentStatistics(String departmentName) {
-        DepartmentEntity department = departmentRepository.findByName(departmentName);
+    public Map<String, Integer> departmentStatistics(String departmentName) {
+        DepartmentEntity department = departmentRepository.findByName(departmentName)
+                .orElseThrow(() -> new NoSuchElementException("Department with id = [" + departmentName + "] not exist"));
         Set<LectorEntity> lectors = department.getLectors();
         int countOfAssistants = 0;
         int countOfAssociateProfessors = 0;
         int countOfProfessors = 0;
 
         for (LectorEntity lectorEntity : lectors) {
-            if (lectorEntity.getAcademicDegree() == AcademicDegree.ASSISTANT) {
-                countOfAssistants++;
-            } else if (lectorEntity.getAcademicDegree() == AcademicDegree.ASSOCIATE_PROFESSOR) {
-                countOfAssociateProfessors++;
-            } else if (lectorEntity.getAcademicDegree() == AcademicDegree.PROFESSOR) {
-                countOfProfessors++;
+            switch (lectorEntity.getAcademicDegree()) {
+                case ASSISTANT:
+                    countOfAssistants++;
+                    break;
+                case ASSOCIATE_PROFESSOR:
+                    countOfAssociateProfessors++;
+                    break;
+                case PROFESSOR:
+                    countOfProfessors++;
+                    break;
             }
         }
-        System.out.println("assistans - " + countOfAssistants + "\nassociate professors - " + countOfAssociateProfessors
-                + "\nprofessors - " + countOfProfessors);
+        Map<String, Integer> statistics = new HashMap<>();
+        statistics.put("assistants", countOfAssistants);
+        statistics.put("associate professors", countOfAssociateProfessors);
+        statistics.put("professors", countOfProfessors);
+        return statistics;
     }
 
-    public void averageSalary(String departmentName) {
-        DepartmentEntity department = departmentRepository.findByName(departmentName);
+    public double averageSalary(String departmentName) {
+        DepartmentEntity department = departmentRepository.findByName(departmentName)
+                .orElseThrow(() -> new NoSuchElementException("Department with id = [" + departmentName + "] not exist"));
         Set<LectorEntity> lectors = department.getLectors();
 
         double averageSalary = lectors.stream()
                 .mapToDouble(LectorEntity::getSalary)
                 .average()
                 .orElse(0);
-
-        System.out.println("The average salary of " + departmentName + " is " + averageSalary);
+        return Math.round(averageSalary);
     }
 
-
-    public void countEmployee(String departmentName) {
-        DepartmentEntity department = departmentRepository.findByName(departmentName);
+    public int countEmployee(String departmentName) {
+        DepartmentEntity department = departmentRepository.findByName(departmentName)
+                .orElseThrow(() -> new NoSuchElementException("Department with id = [" + departmentName + "] not exist"));
         Set<LectorEntity> lectors = department.getLectors();
-        System.out.println(lectors.size());
+        return lectors.size();
     }
 
-    public void globalSearch(String template) {
-        lectorRepository.findAll().stream()
+    public Set<LectorEntity> globalSearch(String template) {
+        return lectorRepository.findAll().stream()
                 .filter(lector ->
-                        lector.getFirstName().toLowerCase().contains(template.toLowerCase()) &&
+                        lector.getFirstName().toLowerCase().contains(template.toLowerCase()) ||
                                 lector.getLastName().toLowerCase().contains(template.toLowerCase())
                 )
-                .forEach(lector -> System.out.println(lector.getFirstName() + " " + lector.getLastName()));
+                .collect(Collectors.toSet());
     }
 }

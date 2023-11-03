@@ -1,17 +1,22 @@
 package com.test.task.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.test.task.enums.Departments;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = "lectors")
 @Table(name = "DEPARTMENT_ENTITY_T01")
 public class DepartmentEntity {
     @Id
@@ -23,8 +28,11 @@ public class DepartmentEntity {
     @Column(name = "NAME")
     private String name;
 
-    @ManyToMany(mappedBy = "departments")
-    private Set<LectorEntity> lectors;
+    @ManyToMany
+    @JoinTable(name = "LECTOR_DEPARTMENT_T01",
+            joinColumns = @JoinColumn(name = "DEPARTMENT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "LECTOR_ID"))
+    private Set<LectorEntity> lectors = new HashSet<>();
 
     @OneToOne
     @JoinColumn(name = "HEAD_ID")

@@ -1,6 +1,6 @@
 package com.test.task.enums;
 
-public enum AcademicDegree {
+public enum Degree {
     ASSISTANT,
     ASSOCIATE_PROFESSOR,
     PROFESSOR
